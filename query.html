@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>查地址</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body{font-family:-apple-system,sans-serif;background:#f5f5f5;margin:0;padding:16px}
+.card{background:#fff;border-radius:12px;padding:20px}
+.input{width:100%;padding:12px;border:1px solid #eee;border-radius:10px;margin:8px 0;box-sizing:border-box}
+.btn{width:100%;padding:14px;background:#e6a23c;color:#fff;border:none;border-radius:25px;font-size:16px}
+#result{margin-top:16px;font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="card">
+  <h3 style="text-align:center;">查地址</h3>
+  <input id="addr" class="input" placeholder="输入 TRC20 地址">
+  <button class="btn" onclick="query()">查询</button>
+  <div id="result"></div>
+</div>
+<script>
+const tg = window.Telegram.WebApp; tg.ready(); tg.expand();
+async function query(){
+  const addr = document.getElementById('addr').value.trim();
+  if(!addr) return;
+  document.getElementById('result').innerHTML = '查询中...';
+  try{
+    const res = await fetch(`https://apilist.tronscanapi.com/api/accountv2?address=${addr}`);
+    const data = await res.json();
+    let html = `<p>地址：${addr}</p>`;
+    html += `<p>TRX：${(data.balance||0)/1e6}</p>`;
+    const usdt = (data.trc20token_balances||[]).find(t=>t.tokenAbbr==='USDT');
+    html += `<p>USDT：${usdt ? usdt.balance/1e6 : 0}</p>`;
+    document.getElementById('result').innerHTML = html;
+  }catch(e){
+    document.getElementById('result').innerHTML = '查询失败';
+  }
+}
+</script>
+</body>
+</html>
